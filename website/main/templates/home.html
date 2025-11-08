@@ -41,12 +41,12 @@
             <h2>📍 Select a Location</h2>
             <select id="location-select">
                 <option value="" disabled selected>Choose your location</option>
-                <option value="downtown">Downtown</option>
-                <option value="uptown">Uptown</option>
-                <option value="west-side">West Side</option>
-                <option value="east-side">East Side</option>
-                <option value="suburb-a">Suburb A</option>
-                <option value="suburb-b">Suburb B</option>
+                <option value="davis">Davis</option>
+                <option value="capen">Capen</option>
+                <option value="knox">Knox</option>
+                <option value="Clemens">Vlemens</option>
+                <option value="park">Park Hall</option>
+                <option value="lockwood">Lockwood</option>
             </select>
         </section>
 
@@ -55,31 +55,42 @@
         <section class="menu">
             <h2>🍔 Our Food Menu</h2>
             <div class="food-menu">
-                <div class="food-item" data-id="1" data-name="Burger" data-img="placeholder-burger.jpg">
-                    <img src="{% static 'images/burger.jpg' %}" alt="A fresh salad">
+                <div class="food-item"
+                    data-id="1"
+                    data-name="Burger"
+                    data-img="{% static 'images/burger.jpg' %}">
+                    <img src="{% static 'images/burger.jpg' %}" alt="A juicy burger">
                     <h3>Burger</h3>
                     <button class="add-to-cart-btn">Add to Cart</button>
                 </div>
 
-                <div class="food-item" data-id="2" data-name="Pizza" data-img="placeholder-pizza.jpg">
-                    <img src="{% static 'images/pizza.jpg' %}" alt="A fresh salad">
+                <div class="food-item"
+                    data-id="2"
+                    data-name="Pizza"
+                    data-img="{% static 'images/pizza.jpg' %}">
+                    <img src="{% static 'images/pizza.jpg' %}" alt="A cheesy pizza">
                     <h3>Pizza</h3>
                     <button class="add-to-cart-btn">Add to Cart</button>
                 </div>
 
-                <div class="food-item" data-id="3" data-name="Salad" data-img="placeholder-salad.jpg">
+                <div class="food-item"
+                    data-id="3"
+                    data-name="Salad"
+                    data-img="{% static 'images/salad.jpg' %}">
                     <img src="{% static 'images/salad.jpg' %}" alt="A fresh salad">
                     <h3>Salad</h3>
                     <button class="add-to-cart-btn">Add to Cart</button>
                 </div>
 
-                <div class="food-item" data-id="4" data-name="Taco" data-img="placeholder-taco.jpg">
-                    <img src="{% static 'images/taco.jpg' %}" alt="A fresh salad">
+                <div class="food-item"
+                    data-id="4"
+                    data-name="Taco"
+                    data-img="{% static 'images/taco.jpg' %}">
+                    <img src="{% static 'images/taco.jpg' %}" alt="A tasty taco">
                     <h3>Taco</h3>
                     <button class="add-to-cart-btn">Add to Cart</button>
                 </div>
             </div>
-            <p style="text-align: center; font-size: 0.8em; margin-top: 15px; color: #666;">*(Note: Replace "placeholder-..." with actual image file paths.)</p>
         </section>
 
         <hr>
@@ -104,36 +115,44 @@
         const orderButton = document.getElementById('order-button');
         const locationSelect = document.getElementById('location-select');
 
-        function renderCart() {
-            if (cart.size === 0) {
-                cartContentsElement.innerHTML = '<p style="text-align: center; color: #666;">Your cart is empty.</p>';
-                return;
-            }
+function renderCart() {
+    if (cart.size === 0) {
+        cartContentsElement.innerHTML =
+            '<p style="text-align: center; color: #666;">Your cart is empty.</p>';
+        return;
+    }
 
-            let html = '';
-            let totalItems = 0;
+    let html = '';
 
-            cart.forEach(item => {
-                totalItems += item.quantity;
-                html += `
-                    <div class="cart-item" data-item-id="${item.id}">
-                        <div class="cart-item-info">
-                            <img src="${item.img}" alt="${item.name}">
-                            <span class="cart-item-name">${item.name}</span>
-                        </div>
-                        <div class="quantity-controls">
-                            <button class="quantity-btn minus-btn" data-id="${item.id}">-</button>
-                            <span class="item-quantity-display">${item.quantity}</span>
-                            <button class="quantity-btn plus-btn" data-id="${item.id}">+</button>
-                        </div>
-                    </div>
-                `;
-            });
+    cart.forEach(item => {
+        // Use proper image path or fallback placeholder
+        const imageSrc = item.img && item.img.trim() !== ''
+            ? item.img
+            : '/static/images/placeholder.jpg';
 
-            cartContentsElement.innerHTML = html;
+        html += `
+            <div class="cart-item" data-item-id="${item.id}">
+                <div class="cart-item-info" style="display:flex; align-items:center;">
+                    <img src="${imageSrc}" alt="${item.name}"
+                         style="width:60px; height:60px; object-fit:cover; border-radius:6px; margin-right:10px;">
+                    <span class="cart-item-name" style="font-weight:600;">${item.name}</span>
+                </div>
+                <div class="quantity-controls">
+                    <button class="quantity-btn minus-btn" data-id="${item.id}">-</button>
+                    <span class="item-quantity-display">${item.quantity}</span>
+                    <button class="quantity-btn plus-btn" data-id="${item.id}">+</button>
+                </div>
+            </div>
+        `;
+    });
 
-            attachQuantityListeners();
-        }
+    // Update cart display
+    cartContentsElement.innerHTML = html;
+
+    // Reattach + / - event handlers
+    attachQuantityListeners();
+}
+
 
         function addItemToCart(id, name, img) {
             if (cart.has(id)) {
