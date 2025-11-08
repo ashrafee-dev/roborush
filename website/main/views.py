@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-import json
+import json, subprocess, sys
+
 
 # Create your views here.
 def home(request):
@@ -18,6 +19,13 @@ def order(request):
             "location": location,
             "selected_items": selected_items
         }
+        
+        subprocess.run(
+            [sys.executable, "/abs/path/script.py"],
+            input = json.dumps(data),
+            text = True
+        )
+        
         return JsonResponse(response)
     return JsonResponse({"error": "Invalid request"}, status=400)
 
