@@ -1,0 +1,243 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Food Order</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f8f8f8; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+        h1, h2 { color: #333; }
+        select { padding: 10px; border-radius: 4px; border: 1px solid #ccc; width: 100%; max-width: 300px; margin-bottom: 20px; }
+        button { padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s; }
+        button:hover { background-color: #0056b3; }
+        hr { border: 0; height: 1px; background: #ddd; margin: 25px 0; }
+
+        .food-menu { display: flex; justify-content: space-around; flex-wrap: wrap; }
+        .food-item { border: 1px solid #e0e0e0; padding: 15px; margin: 10px; text-align: center; width: 160px; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); }
+        .food-item img { width: 100%; height: 90px; object-fit: cover; border-radius: 5px; margin-bottom: 10px; }
+        .food-item h3 { margin: 5px 0 10px 0; color: #444; font-size: 1.1em; }
+
+        #cart-contents { padding: 15px; border: 2px solid #28a745; border-radius: 8px; margin-top: 20px; background-color: #f6fff8; }
+        .cart-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #e9ecef; }
+        .cart-item:last-child { border-bottom: none; }
+        .cart-item-info { display: flex; align-items: center; flex-grow: 1; }
+        .cart-item-info img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 15px; border: 1px solid #ccc; }
+        .cart-item-name { font-weight: bold; }
+        .quantity-controls { display: flex; align-items: center; }
+        .quantity-controls button { width: 30px; height: 30px; padding: 0; margin: 0 5px; background-color: #f0f0f0; color: #333; border: 1px solid #ccc; font-weight: bold; }
+        .quantity-controls button:hover { background-color: #e0e0e0; }
+        .item-quantity-display { font-size: 1.1em; font-weight: bold; width: 20px; text-align: center; color: #333; }
+        .order-section { text-align: center; margin-top: 30px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Welcome to Our Basic Home Page</h1>
+
+        <section class="location-selection">
+            <h2>📍 Select a Location</h2>
+            <select id="location-select">
+                <option value="" disabled selected>Choose your location</option>
+                <option value="davis">Davis</option>
+                <option value="capen">Capen</option>
+                <option value="knox">Knox</option>
+                <option value="Clemens">Vlemens</option>
+                <option value="park">Park Hall</option>
+                <option value="lockwood">Lockwood</option>
+            </select>
+        </section>
+
+        <hr>
+
+        <section class="menu">
+            <h2>🍔 Our Food Menu</h2>
+            <div class="food-menu">
+                <div class="food-item"
+                    data-id="1"
+                    data-name="Burger"
+                    data-img="{% static 'images/burger.jpg' %}">
+                    <img src="{% static 'images/burger.jpg' %}" alt="A juicy burger">
+                    <h3>Burger</h3>
+                    <button class="add-to-cart-btn">Add to Cart</button>
+                </div>
+
+                <div class="food-item"
+                    data-id="2"
+                    data-name="Pizza"
+                    data-img="{% static 'images/pizza.jpg' %}">
+                    <img src="{% static 'images/pizza.jpg' %}" alt="A cheesy pizza">
+                    <h3>Pizza</h3>
+                    <button class="add-to-cart-btn">Add to Cart</button>
+                </div>
+
+                <div class="food-item"
+                    data-id="3"
+                    data-name="Salad"
+                    data-img="{% static 'images/salad.jpg' %}">
+                    <img src="{% static 'images/salad.jpg' %}" alt="A fresh salad">
+                    <h3>Salad</h3>
+                    <button class="add-to-cart-btn">Add to Cart</button>
+                </div>
+
+                <div class="food-item"
+                    data-id="4"
+                    data-name="Taco"
+                    data-img="{% static 'images/taco.jpg' %}">
+                    <img src="{% static 'images/taco.jpg' %}" alt="A tasty taco">
+                    <h3>Taco</h3>
+                    <button class="add-to-cart-btn">Add to Cart</button>
+                </div>
+            </div>
+        </section>
+
+        <hr>
+
+        <section class="cart-display">
+            <h2>🛒 Your Cart</h2>
+            <div id="cart-contents">
+                <p style="text-align: center; color: #666;">Your cart is empty.</p>
+            </div>
+        </section>
+
+        <hr>
+
+        <section class="order-section">
+            <button id="order-button">Place Order</button>
+        </section>
+    </div>
+
+    <script>
+        const cart = new Map();
+        const cartContentsElement = document.getElementById('cart-contents');
+        const orderButton = document.getElementById('order-button');
+        const locationSelect = document.getElementById('location-select');
+
+function renderCart() {
+    if (cart.size === 0) {
+        cartContentsElement.innerHTML =
+            '<p style="text-align: center; color: #666;">Your cart is empty.</p>';
+        return;
+    }
+
+    let html = '';
+
+    cart.forEach(item => {
+        // Use proper image path or fallback placeholder
+        const imageSrc = item.img && item.img.trim() !== ''
+            ? item.img
+            : '/static/images/placeholder.jpg';
+
+        html += `
+            <div class="cart-item" data-item-id="${item.id}">
+                <div class="cart-item-info" style="display:flex; align-items:center;">
+                    <img src="${imageSrc}" alt="${item.name}"
+                         style="width:60px; height:60px; object-fit:cover; border-radius:6px; margin-right:10px;">
+                    <span class="cart-item-name" style="font-weight:600;">${item.name}</span>
+                </div>
+                <div class="quantity-controls">
+                    <button class="quantity-btn minus-btn" data-id="${item.id}">-</button>
+                    <span class="item-quantity-display">${item.quantity}</span>
+                    <button class="quantity-btn plus-btn" data-id="${item.id}">+</button>
+                </div>
+            </div>
+        `;
+    });
+
+    // Update cart display
+    cartContentsElement.innerHTML = html;
+
+    // Reattach + / - event handlers
+    attachQuantityListeners();
+}
+
+
+        function addItemToCart(id, name, img) {
+            if (cart.has(id)) {
+                cart.get(id).quantity++;
+            } else {
+                cart.set(id, { id, name, img, quantity: 1 });
+            }
+            renderCart();
+        }
+
+        function updateQuantity(id, change) {
+            if (cart.has(id)) {
+                const item = cart.get(id);
+                item.quantity += change;
+
+                if (item.quantity <= 0) {
+                    cart.delete(id);
+                }
+                renderCart();
+            }
+        }
+
+        function attachQuantityListeners() {
+            document.querySelectorAll('.quantity-controls .plus-btn').forEach(button => {
+                button.onclick = (e) => {
+                    const id = e.target.getAttribute('data-id');
+                    updateQuantity(id, 1);
+                };
+            });
+            document.querySelectorAll('.quantity-controls .minus-btn').forEach(button => {
+                button.onclick = (e) => {
+                    const id = e.target.getAttribute('data-id');
+                    updateQuantity(id, -1);
+                };
+            });
+        }
+
+        document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const itemDiv = this.closest('.food-item');
+                const id = itemDiv.getAttribute('data-id');
+                const name = itemDiv.getAttribute('data-name');
+                const img = itemDiv.getAttribute('data-img');
+                
+                addItemToCart(id, name, img);
+            });
+        });
+
+        orderButton.addEventListener('click', async function() {
+            const selectedLocation = locationSelect.value;
+            const selectedItems = Array.from(cart.values()).map(item => item.name);
+
+            if (!selectedLocation) {
+                alert('🛑 Please select a location before placing your order.');
+                return;
+            }
+            if (selectedItems.length === 0) {
+                alert('⚠️ Your cart is empty! Add some food before ordering.');
+                return;
+            }
+
+            const orderData = {
+                location: selectedLocation,
+                selected_items: selectedItems
+            };
+
+            const response = await fetch("/home/order/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(orderData)
+            });
+
+            const result = await response.json();
+            console.log("Server response:", result);
+
+            alert(`✅ Order placed!\n\nLocation: ${result.location}\nItems: ${result.selected_items.join(", ")}`);
+
+            cart.clear();
+            renderCart();
+            locationSelect.value = "";
+        });
+
+
+        renderCart();
+    </script>
+
+</body>
+</html>
