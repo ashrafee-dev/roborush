@@ -92,6 +92,7 @@ class ElegooRobotController:
             continuous: If True, keeps resending to prevent 3-sec timeout
             keep_alive_interval: How often to resend (seconds, must be < 3)
         """
+        start = time.time()
         if not continuous:
             return self._send_command({"N": 101, "D1": 1})
         else:
@@ -102,6 +103,8 @@ class ElegooRobotController:
                 if not result:
                     print("⚠️ Connection lost, attempting to reconnect...")
                     try:
+                        if time.time() - start > 10:
+                            break
                         self.disconnect()
                         time.sleep(0.5)
                         self.connect()
