@@ -228,7 +228,7 @@ function renderCart() {
             const result = await response.json();
             console.log("Server response:", result);
 
-            alert(`✅ Order placed!\n\nLocation: ${result.location}\nItems: ${result.selected_items.join(", ")}`);
+            alert(`✅ Order Delivered!\n\nLocation: ${result.location}\nItems: ${result.selected_items.join(", ")}`);
 
             cart.clear();
             renderCart();
