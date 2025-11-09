@@ -21,7 +21,7 @@ def order(request):
         }
         
         subprocess.run(
-            [sys.executable, "/abs/path/script.py"],
+            [sys.executable, "/Volumes/Mahdi/UB/roborush/robot_control/robot_script.py"],
             input = json.dumps(data),
             text = True
         )
